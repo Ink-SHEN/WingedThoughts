@@ -1,36 +1,48 @@
-# 工作流名称
-name: Deploy VitePress to Github Pages
+name: Deploy VitePress site to Pages
 
-# 触发条件：当main分支收到push时自动执行
 on:
-    push:
-        branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
 
-# 定义一个名为 build-and-deploy 的任务
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
-    build-and-deploy:
-        runs-on: ubuntu-latest # 在最新的虚拟机上运行
-        steps:
-            # 步骤1：拉取仓库代码
-            - uses: actions/checkout@v4
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Install dependencies
+        run: npm ci
+      - name: Build with VitePress
+        run: npm run docs:build
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
 
-            # 步骤2： 安装Node.js 20环境
-            - name: Setup Node
-              uses: actions/setup-node@v4
-              with:
-                node-version: 20
-
-            # 步骤2：安装项目依赖
-            - name: Install dependencies
-              run: npm ci
-
-            # 步骤4：执行构建命令，生成静态网页到 docs/.vitepress/dist 目录
-            - name: Build
-              run: npm run docs:build
-
-            # 步骤5：把构建产物部署到 Github Pages
-            - name: Deploy
-              uses: peaceiris/actions-gh-pages@v4
-              with:
-                github_token: ${{ secrets.GITHUB_TOKEN }} # 使用 Github 自动提供给的令牌
-                publish_dir: docs/.vitepress/dist # 要部署的文件夹
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
