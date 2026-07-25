@@ -1,2 +1,2 @@
-# a-winged-thought
-a winged thought that escaped before it could be written down
+# WingedThoughts
+Some winged thoughts may escape before it could be written down, so I wanna capture them as much as I can
