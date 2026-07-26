@@ -27,6 +27,12 @@ export default defineConfig({
               items: [
                 { text: 'fds', link: '/notes/fds' },
                 { text: '线性代数', link: '/notes/linear-algebra' },
+                {
+                  text: '个人网站搭建',
+                  items: [
+                    { text: '初步构建', link: '/notes/website/InitialConstuction' }
+                  ]
+                }
               ]
             }
           ]
@@ -51,7 +57,13 @@ export default defineConfig({
               text: 'Notes',
               items: [
                 { text: 'fds', link: '/en/notes/fds' },
-                { text: 'Linear Algebra', link: '/en/notes/linear-algebra' }
+                { text: 'Linear Algebra', link: '/en/notes/linear-algebra' },
+                {
+                  text: 'Personal Website Construction',
+                  items: [
+                    { text: 'Initial Construction', link: '/en/notes/website/InitialConstuction' }
+                  ]
+                }
               ]
             }
           ]
