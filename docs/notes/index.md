@@ -4,3 +4,4 @@
 
 - [fds](./fds)
 - [线性代数](./linear-algebra)
+- [个人网站搭建](./website/InitialConstruction.md)
