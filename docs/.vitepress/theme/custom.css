@@ -100,33 +100,56 @@ html.dark {
   width: 100%;
 }
 .VPHome .VPHero .main {
+  /* 默认主题为 .main 设置 position: relative，会导致滚动箭头锚定到 .main 底部
+     与按钮重合；改为 static 让箭头锚定到 100vh 的 .VPHero */
+  position: static;
   margin: 0 auto;
   max-width: 860px;
   text-align: center;
 }
 
-/* 主标题：衬线体混排（Newsreader + 霞鹜文楷） */
-.VPHome .VPHero .name,
-.VPHome .VPHero .text {
-  max-width: none;
-  font-family: var(--font-serif);
-  font-size: clamp(2.5rem, 5vw, 4rem);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+/* 标题容器：弹性纵向排列，确保主标题、介绍各自水平居中 */
+.VPHome .VPHero .heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* 覆盖默认渐变文字，Hero 区固定使用暖白（照片背景上始终可读） */
-.VPHome .VPHero .name .clip {
-  background: none;
-  -webkit-background-clip: initial;
-  background-clip: initial;
-  color: #f1f5f9;
-  -webkit-text-fill-color: #f1f5f9;
+/* 主标题：衬线体，放大与下方介绍拉开层级（保留默认主题品牌蓝渐变文字） */
+.VPHome .VPHero .name {
+  max-width: none;
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
+
+/* 主标题下的中文装饰行：霞鹜文楷「浮思」，天空灰粉 accent */
+.VPHome .VPHero .name::after {
+  content: '浮思';
+  display: block;
+  margin-top: 14px;
+  font-family: var(--font-cjk-display);
+  font-size: 0.34em;
+  font-weight: 400;
+  letter-spacing: 0.45em;
+  padding-left: 0.45em; /* 补偿字间距，保持视觉居中 */
+  color: rgba(212, 168, 154, 0.85);
+  -webkit-text-fill-color: rgba(212, 168, 154, 0.85); /* 覆盖渐变文字的透明填充 */
+}
+
+/* 介绍文字：衬线体，缩小弱化，与主标题区分 */
 .VPHome .VPHero .text {
-  color: #cbd5e1;
-  -webkit-text-fill-color: #cbd5e1;
+  max-width: 640px;
+  margin-top: 20px;
+  font-family: var(--font-serif);
+  font-size: clamp(1.2rem, 2.4vw, 1.9rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  color: rgba(203, 213, 225, 0.85);
+  -webkit-text-fill-color: rgba(203, 213, 225, 0.85);
 }
 
 /* 副标题：中文楷体，人文温度 */
@@ -314,10 +337,10 @@ html.scrolled .VPNavBar .divider {
     linear-gradient(to bottom, #161b22, #0d1117);
 }
 
-/* 语言标签移动到窗口栏右侧 */
+/* 语言标签移到窗口栏右侧、复制按钮左侧 */
 .vp-doc div[class*='language-'] .lang {
-  top: 12px;
-  right: 16px;
+  top: 13px;
+  right: 52px;
   font-size: 11px;
   color: #64748b;
 }
@@ -362,13 +385,14 @@ html.scrolled .VPNavBar .divider {
 .vp-doc .token.number { color: #79c0ff; }
 .vp-doc .token.operator { color: #ff7b72; }
 
-/* 复制按钮 */
+/* 复制按钮：注意只能用 background-color，不能用 background 简写，
+   否则会覆盖默认主题通过 background-image 注入的复制图标 */
 .vp-doc div[class*='language-'] button.copy {
   top: 8px;
   right: 8px;
   width: 32px;
   height: 32px;
-  background: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   opacity: 0.4;
@@ -378,7 +402,7 @@ html.scrolled .VPNavBar .divider {
   opacity: 1;
 }
 .vp-doc div[class*='language-'] button.copy:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* ---------- 5. 文章页 ---------- */
