@@ -39,7 +39,7 @@ export default defineConfig({
                 {
                   text: '个人网站搭建',
                   items: [
-                    { text: '初步构建', link: '/notes/website/InitialConstuction' },
+                    { text: '初步构建', link: '/notes/website/InitialConstruction' },,
                     { text: '自定义主题', link: '/notes/website/CustomTheme' }
                   ]
                 }
@@ -71,7 +71,7 @@ export default defineConfig({
                 {
                   text: 'Personal Website Construction',
                   items: [
-                    { text: 'Initial Construction', link: '/en/notes/website/InitialConstuction' },
+                    { text: 'Initial Construction', link: '/en/notes/website/InitialConstruction' },,
                     { text: 'Custom Theme', link: '/en/notes/website/CustomTheme' }
                   ]
                 }
