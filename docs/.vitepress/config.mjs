@@ -7,6 +7,15 @@ export default defineConfig({
   //默认语言
   lang: 'zh-CN',
 
+  //代码高亮：深/浅色模式下统一使用 github-dark 主题（Stripe 风格深色代码块，
+  //配色即设计稿中的 #FF7B72/#A5D6FF/#D2A8FF/#8B949E/#79C0FF）
+  markdown: {
+    theme: {
+      light: 'github-dark',
+      dark: 'github-dark'
+    }
+  },
+
   //国际化配置
   locales: {
     root: {
@@ -30,7 +39,8 @@ export default defineConfig({
                 {
                   text: '个人网站搭建',
                   items: [
-                    { text: '初步构建', link: '/notes/website/InitialConstuction' }
+                    { text: '初步构建', link: '/notes/website/InitialConstuction' },
+                    { text: '自定义主题', link: '/notes/website/CustomTheme' }
                   ]
                 }
               ]
@@ -61,7 +71,8 @@ export default defineConfig({
                 {
                   text: 'Personal Website Construction',
                   items: [
-                    { text: 'Initial Construction', link: '/en/notes/website/InitialConstuction' }
+                    { text: 'Initial Construction', link: '/en/notes/website/InitialConstuction' },
+                    { text: 'Custom Theme', link: '/en/notes/website/CustomTheme' }
                   ]
                 }
               ]

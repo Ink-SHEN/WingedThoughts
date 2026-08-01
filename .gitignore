@@ -1,0 +1,6 @@
+# 依赖
+node_modules/
+
+# VitePress 构建产物与缓存（由 GitHub Actions 从源码重新构建，无需入库）
+docs/.vitepress/dist/
+docs/.vitepress/cache/
