@@ -2,7 +2,7 @@
 layout: home
 
 hero:
-  name: "Ink's Winged Thought"
+  name: "Ink's Winged Thoughts"
   text: "Here I store my thoughts, in search of knowledge's heart and life's elegance"
   tagline: A personal space for knowledge, ideas and reflections
   actions:
