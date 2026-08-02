@@ -4,7 +4,7 @@ A collection of my learning notes and thoughts.
 
 <div class="note-cards">
   <a class="note-card" href="./fds">
-    <span class="note-card-glyph">ƒ</span>
+    <span class="note-card-glyph">{}</span>
     <span class="note-card-body">
       <span class="note-card-title">fds</span>
       <span class="note-card-desc">Fundamental data structures &amp; algorithms</span>
@@ -20,7 +20,7 @@ A collection of my learning notes and thoughts.
     <span class="note-card-arrow">→</span>
   </a>
   <a class="note-card" href="./website/InitialConstruction">
-    <span class="note-card-glyph">✦</span>
+    <span class="note-card-glyph">W</span>
     <span class="note-card-body">
       <span class="note-card-title">Personal Website Construction</span>
       <span class="note-card-desc">From VitePress to GitHub Pages, end to end</span>

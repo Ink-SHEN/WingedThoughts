@@ -576,7 +576,8 @@ html:not(.dark) .vp-doc tr:nth-child(even) td {
   justify-content: center;
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 22px;
+  font-size: 20px;
+  line-height: 1; /* 去掉行盒残余高度，保证字形视觉居中 */
   color: var(--vp-c-brand-2);
   background: rgba(107, 141, 212, 0.06);
   border: 1px solid rgba(107, 141, 212, 0.22);
