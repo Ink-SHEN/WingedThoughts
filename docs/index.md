@@ -15,10 +15,10 @@ hero:
       link: /about
 
 features:
-  - title: 知识笔记
-    details: 整理学习过程中的概念、方法与心得
-  - title: 双语内容
-    details: 简体中文与英文并行，方便不同场景查阅
+  - title: 捕捉灵感
+    details: 尽量去记录学习以及生活中的一些想法
+  - title: 英汉双语
+    details: 简体中文与英文并行，便于关键内容的双语掌握
   - title: 持续更新
-    details: 所思所想随时间沉淀，不断补充与迭代
+    details: 我会一直坚持写下去（的吧）
 ---
