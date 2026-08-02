@@ -14,12 +14,10 @@ hero:
       link: /en/about
 
 features:
-  - title: Knowledge Notes
-    details: Concepts, methods and insights gathered along the way
-  - title: Bilingual Content
-    details: Simplified Chinese and English side by side for different contexts
-  - title: Continuously Updated
-    details: Thoughts settle over time, constantly refined and iterated
+  - title: Capturing Inspiration
+    details: Trying to record thoughts from study and daily life
+  - title: Bilingual (English-Chinese)
+    details: Simplified Chinese and English side by side, facilitating bilingual mastery of key content
+  - title: Continuous Updates
+    details: I will keep writing persistently (I hope)
 ---
-
-# Winged Thoughts
