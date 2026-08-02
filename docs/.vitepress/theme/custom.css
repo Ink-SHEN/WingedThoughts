@@ -313,36 +313,23 @@ html.scrolled .VPNavBar .divider {
 
 /* ---------- 4. 代码块（Stripe 风格） ---------- */
 
-/* 代码块外层：两种模式下都保持深色（参考 Stripe Docs） */
+/* 代码块外层：极简扁平，两种模式下都保持深色 */
 .vp-doc div[class*='language-'] {
   background: #0d1117;
   border: 1px solid #1e293b;
   border-radius: 12px;
   margin: 24px 0;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
 }
 
-/* macOS 窗口按钮栏（三个圆点用径向渐变绘制） */
-.vp-doc div[class*='language-']::before {
-  content: '';
-  display: block;
-  height: 40px;
-  border-bottom: 1px solid #1e293b;
-  background-image:
-    radial-gradient(circle 5px at 22px 20px, #ff5f57 99%, transparent),
-    radial-gradient(circle 5px at 42px 20px, #febc2e 99%, transparent),
-    radial-gradient(circle 5px at 62px 20px, #28c840 99%, transparent),
-    linear-gradient(to bottom, #161b22, #0d1117);
-}
-
-/* 语言标签移到窗口栏右侧、复制按钮左侧 */
+/* 语言标签：右上角弱化显示 */
 .vp-doc div[class*='language-'] .lang {
-  top: 13px;
+  top: 12px;
   right: 52px;
   font-size: 11px;
-  color: #64748b;
+  letter-spacing: 0.05em;
+  color: #475569;
 }
 
 /* 行号区域 */
@@ -385,24 +372,25 @@ html.scrolled .VPNavBar .divider {
 .vp-doc .token.number { color: #79c0ff; }
 .vp-doc .token.operator { color: #ff7b72; }
 
-/* 复制按钮：注意只能用 background-color，不能用 background 简写，
-   否则会覆盖默认主题通过 background-image 注入的复制图标 */
+/* 复制按钮：幽灵图标，悬停代码块时才浮现（保持 background-color 写法以保留图标） */
 .vp-doc div[class*='language-'] button.copy {
-  top: 8px;
-  right: 8px;
+  top: 6px;
+  right: 6px;
   width: 32px;
   height: 32px;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: transparent;
+  border: 1px solid transparent;
   border-radius: 6px;
-  opacity: 0.4;
+  opacity: 0;
   transition: all 0.2s;
 }
 .vp-doc div[class*='language-']:hover button.copy {
-  opacity: 1;
+  opacity: 0.6;
 }
 .vp-doc div[class*='language-'] button.copy:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* ---------- 5. 文章页 ---------- */
@@ -411,14 +399,15 @@ html.scrolled .VPNavBar .divider {
 .VPDoc .content-container {
   max-width: 860px;
 }
+
+/* 笔记正文与首页大标题统一衬线体：英文 Newsreader，中文回落到 Noto Serif SC */
 .vp-doc {
+  font-family: var(--font-serif);
   line-height: 1.8;
 }
 .vp-doc p {
   margin: 1.5em 0;
 }
-
-/* 标题用衬线体，增强人文感 */
 .vp-doc h1,
 .vp-doc h2,
 .vp-doc h3 {
@@ -426,12 +415,32 @@ html.scrolled .VPNavBar .divider {
   letter-spacing: -0.01em;
 }
 
-/* 引用块：左侧 3px 品牌色边框 + 品牌色微底 */
+/* 强调色收敛为品牌色（首页标题渐变的两种雾蓝），语法高亮不受影响 */
+.vp-doc strong {
+  color: var(--vp-c-brand-2);
+  font-weight: 600;
+}
+.vp-doc em {
+  color: var(--vp-c-brand-1);
+}
+
+/* 引用块：左侧品牌蓝渐变指示条 + 品牌色微底 */
 .vp-doc blockquote {
-  border-left: 3px solid var(--vp-c-brand-1);
+  position: relative;
+  border-left: none;
   background: rgba(107, 141, 212, 0.05);
-  padding: 16px 20px;
+  padding: 16px 20px 16px 24px;
   border-radius: 8px;
+}
+.vp-doc blockquote::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 3px;
+  background: linear-gradient(to bottom, var(--vp-c-brand-2), var(--vp-c-brand-1));
 }
 .vp-doc blockquote > p {
   margin: 0;
@@ -533,7 +542,141 @@ html:not(.dark) .vp-doc tr:nth-child(even) td {
   font-weight: 600;
 }
 
-/* ---------- 8. 滚动条与选区 ---------- */
+/* ---------- 8. 笔记目录卡片与翻页器 ---------- */
+
+/* 目录页图形化入口卡片 */
+.vp-doc .note-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin: 32px 0;
+}
+.vp-doc a.note-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--vp-c-border);
+  border-radius: 14px;
+  background: var(--vp-c-bg-alt);
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.vp-doc a.note-card:hover {
+  border-color: rgba(107, 141, 212, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(107, 141, 212, 0.12);
+}
+.vp-doc .note-card-glyph {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--vp-c-brand-2);
+  background: rgba(107, 141, 212, 0.06);
+  border: 1px solid rgba(107, 141, 212, 0.22);
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.vp-doc a.note-card:hover .note-card-glyph {
+  background: rgba(107, 141, 212, 0.12);
+  border-color: rgba(107, 141, 212, 0.4);
+}
+.vp-doc .note-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.vp-doc .note-card-title {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+.vp-doc .note-card-desc {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--vp-c-text-2);
+}
+.vp-doc .note-card-arrow {
+  margin-left: auto;
+  font-family: var(--font-sans);
+  color: var(--vp-c-text-3);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.vp-doc a.note-card:hover .note-card-arrow {
+  color: var(--vp-c-brand-1);
+  transform: translateX(4px);
+}
+
+/* 上一页/下一页翻页器：卡片化 + 方向箭头 */
+.VPDocFooter .pager-link {
+  border: 1px solid var(--vp-c-border);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.VPDocFooter .pager-link:hover {
+  border-color: rgba(107, 141, 212, 0.45);
+  box-shadow: 0 4px 24px rgba(107, 141, 212, 0.1);
+  transform: translateY(-1px);
+}
+.VPDocFooter .pager-link .desc {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vp-c-text-3);
+}
+.VPDocFooter .pager-link .title {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  color: var(--vp-c-brand-1);
+  transition: color 0.3s;
+}
+.VPDocFooter .pager-link:hover .title {
+  color: var(--vp-c-brand-2);
+}
+.VPDocFooter .pager-link.next::after {
+  content: '→';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--vp-c-text-3);
+  transition: all 0.3s;
+}
+.VPDocFooter .pager-link.prev::before {
+  content: '←';
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--vp-c-text-3);
+  transition: all 0.3s;
+}
+.VPDocFooter .pager-link.next {
+  position: relative;
+  padding-right: 44px;
+}
+.VPDocFooter .pager-link.prev {
+  position: relative;
+  padding-left: 44px;
+}
+.VPDocFooter .pager-link.next:hover::after {
+  color: var(--vp-c-brand-1);
+  transform: translateY(-50%) translateX(3px);
+}
+.VPDocFooter .pager-link.prev:hover::before {
+  color: var(--vp-c-brand-1);
+  transform: translateY(-50%) translateX(-3px);
+}
+
+/* ---------- 9. 滚动条与选区 ---------- */
 
 ::-webkit-scrollbar {
   width: 6px;
