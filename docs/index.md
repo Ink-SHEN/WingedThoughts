@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "Winged Thoughts"
+  name: "Ink's Winged Thought"
   text: "Here I store my thoughts, in search of knowledge's heart and life's elegance"
   tagline: 记录知识、灵感与思考的个人空间
   actions:

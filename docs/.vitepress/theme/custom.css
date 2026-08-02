@@ -119,22 +119,22 @@ html.dark {
 .VPHome .VPHero .name {
   max-width: none;
   font-family: var(--font-serif);
-  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-size: clamp(2.6rem, 6vw, 4.6rem);
   font-weight: 400;
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
-/* 主标题下的中文装饰行：霞鹜文楷「浮思」，天空灰粉 accent */
+/* 主标题下的中文装饰行：霞鹜文楷「Ink的浮思」，天空灰粉 accent */
 .VPHome .VPHero .name::after {
-  content: '浮思';
+  content: 'Ink的浮思';
   display: block;
-  margin-top: 14px;
+  margin-top: 18px;
   font-family: var(--font-cjk-display);
-  font-size: 0.34em;
+  font-size: 0.32em;
   font-weight: 400;
-  letter-spacing: 0.45em;
-  padding-left: 0.45em; /* 补偿字间距，保持视觉居中 */
+  letter-spacing: 0.18em;
+  padding-left: 0.18em; /* 补偿字间距，保持视觉居中 */
   color: rgba(212, 168, 154, 0.85);
   -webkit-text-fill-color: rgba(212, 168, 154, 0.85); /* 覆盖渐变文字的透明填充 */
 }
