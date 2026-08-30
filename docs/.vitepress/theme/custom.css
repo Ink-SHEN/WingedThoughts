@@ -53,7 +53,7 @@
   --vp-c-divider: #e2e8f0;
   --vp-c-border: rgba(0, 0, 0, 0.08);
 
-  /* 首页 Hero 背景图路径由 Layout.vue 通过 withBase() 注入 */
+  /* 首页 Hero 背景图由 Layout.vue <picture> 层注入，不再使用 CSS var */
   --hero-bg-image: none;
 }
 
@@ -82,20 +82,102 @@ html.dark {
 
 /* ---------- 2. 首页 Hero ---------- */
 
-/* 全屏照片背景 + 渐变遮罩（确保文字可读） */
+/* 全屏照片背景层（由 Layout.vue <picture> 注入）+ 渐变遮罩（确保文字可读）
+   isolation: isolate 让 .VPHero 成为层叠上下文，
+   保证 z-index:-1 的背景层稳定地压在 .VPHero 背景之上、文字之下 */
 .VPHome .VPHero {
   position: relative;
+  isolation: isolate;
   min-height: 100vh;
   display: flex;
   align-items: center;
-  background-image:
-    linear-gradient(to top, #0b0f19 0%, rgba(11, 15, 25, 0.65) 45%, rgba(11, 15, 25, 0.25) 100%),
-    var(--hero-bg-image);
-  background-size: cover;
-  background-position: center;
 }
 
-/* Hero 内容居中，取消默认左对齐 */
+/* ---------- 响应式背景图图层（<picture> 层） ---------- */
+
+/* 图层容器：绝对定位铺满 Hero，z-index 在内容之下 */
+.hero-bg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+/* 图层内三层必须显式指定 z-index：
+   <img> 默认 position:static 会画在「行内层」（绘制顺序第 5 步），
+   而 absolute 的 lqip / overlay 画在第 8 步 —— 结果模糊占位图会永久盖住真实照片。
+   显式分层后顺序固定为：LQIP(0) → 真实图(1) → 渐变遮罩(2)。 */
+.hero-bg-lqip {
+  position: absolute;
+  inset: -5%;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(20px);
+  transform: scale(1.05);
+}
+
+/* 真实背景图：object-fit cover + 加载完成淡入 */
+.hero-bg-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  transition: opacity 0.6s ease-out;
+}
+.hero-bg-img.loaded {
+  opacity: 1;
+}
+
+/* 渐变遮罩层：绘制在图片之上、文字之下 */
+.hero-bg-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+/* 深色模式：完全沿用原始设计的暗色渐变（图片保持原始不透明度） */
+html.dark .hero-bg-overlay {
+  background-image:
+    linear-gradient(to top, #0b0f19 0%, rgba(11, 15, 25, 0.65) 45%, rgba(11, 15, 25, 0.25) 100%);
+}
+
+/* 浅色模式：照片从顶部原样显示，向下渐隐至纯白。
+   曲线分三段：
+     · 0~16%   几乎不衰减，照片原样可见；
+     · 16~88%  抬升到 0.99。其中 16%~32% 是最陡的一段，作用是在
+       主标题所在的 24%~46% 区间铺出足够浅的底 —— 这样文字不必依赖
+       任何白色光晕就能保持锐利（配套规则见下方「浅色模式 Hero 文字」）；
+     · 88% 之后斜率趋近 0，收尾极缓，肉眼看不出淡化终点。
+   全程单调，斜率峰值 0.0275/1%（约每 6px 变化 3% 透明度），无可见色阶。
+   最后 2% 由 #ffffff 交棒给 var(--vp-c-bg)（#fafaf8），
+   与下方内容底色严丝合缝，不留可见过渡边界。 */
+html:not(.dark) .hero-bg-overlay {
+  background-image: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.02) 8%,
+    rgba(255, 255, 255, 0.14) 16%,
+    rgba(255, 255, 255, 0.36) 24%,
+    rgba(255, 255, 255, 0.5) 32%,
+    rgba(255, 255, 255, 0.63) 42%,
+    rgba(255, 255, 255, 0.755) 54%,
+    rgba(255, 255, 255, 0.85) 66%,
+    rgba(255, 255, 255, 0.92) 78%,
+    rgba(255, 255, 255, 0.965) 88%,
+    rgba(255, 255, 255, 0.987) 94%,
+    #ffffff 98%,
+    var(--vp-c-bg) 100%
+  );
+}
+
+/* 浅色模式：保持照片原貌，仅轻微去饱和提亮，不降低不透明度 */
+html:not(.dark) .hero-bg-img {
+  filter: saturate(0.85) brightness(1.04);
+}
 .VPHome .VPHero .container {
   width: 100%;
 }
@@ -164,10 +246,31 @@ html.dark {
   -webkit-text-fill-color: rgba(226, 232, 240, 0.75);
 }
 
-/* 按钮组居中 */
+/* 按钮组：居中 + 加大间距。
+   VitePress 默认用 .actions{margin:-6px} 配 .action{padding:6px} 造出 12px 间隙，
+   横向与纵向被绑成同一个值。这里清掉它们，改用显式的 column-gap / row-gap，
+   这样「并排间距」和「换行后的行距」可以分别调节。 */
 .VPHome .VPHero .actions {
   justify-content: center;
   padding-top: 40px;
+  margin: 0;
+  column-gap: 20px;
+  row-gap: 16px;
+}
+
+/* 抵消 VitePress .action 默认的 6px padding，间距统一交给 gap */
+.VPHome .VPHero .action {
+  padding: 0;
+}
+
+/* 窄屏 / 大字号（如 200% 缩放）时按钮会换行，行距单独放大，
+   避免两行玻璃按钮挤在一起看不出层次。 */
+@media (max-width: 640px) {
+  .VPHome .VPHero .actions {
+    padding-top: 32px;
+    column-gap: 16px;
+    row-gap: 20px;
+  }
 }
 
 /* 标题淡入动画（纯 CSS，ease-out-expo） */
@@ -199,58 +302,185 @@ html.dark {
   animation-delay: 0.8s;
 }
 
-/* Apple Liquid Glass 按钮（CSS 模拟） */
+/* ==========================================================================
+   Hero 按钮 — Apple Liquid Glass（iOS 26 / macOS Tahoe）复刻
+   材质分层（对应 Liquid Glass「由多层组成，持续改变色调/阴影/动态范围」）：
+     1. backdrop-filter blur+saturate  → 玻璃下方的实时背景模糊层
+     2. background-color（低不透明）    → 玻璃本体色调
+     3. ::after 顶部渐变 + 底部回光      → 镜面高光 specular + 环境反射
+     4. ::before 跟随指针的径向光斑      → 移动时的镜面响应
+     5. box-shadow inset 顶亮/底暗      → 极细内高光描边 + 材质厚度的内阴影
+     6. box-shadow 双层外阴影           → 与背景的轻量区隔（上浮时加深）
+   ========================================================================== */
+
 .VPHome .VPHero .VPButton {
+  /* 指针高光坐标与可见度，由 Layout.vue 的 pointermove 写入 */
+  --lg-gx: 50%;
+  --lg-gy: 50%;
+  --lg-glow: 0;
+
+  /* ===== 液态玻璃参数 =====
+     两个按钮共用同一套值：玻璃本体（--lg-fill-*）与着色层（--lg-tint-*）是
+     两个独立的图层，叠加而非互相替换。
+     .brand 只允许改 --lg-tint-*（Apple 的 tinting 用于强调主操作），
+     不再覆写 background-color —— 否则两个按钮的"透明度"会实打实地不一致，
+     浅色下就会一个像白玻璃、一个像淡蓝雾。
+     模糊强度 / 描边 / 内外阴影同理，只写在下面这一处，两按钮天然相同。 */
+  --lg-fill: rgba(255, 255, 255, 0.1);
+  --lg-fill-hover: rgba(255, 255, 255, 0.16);
+  --lg-fill-active: rgba(255, 255, 255, 0.22);
+  --lg-tint: rgba(139, 174, 232, 0);
+  --lg-tint-hover: rgba(139, 174, 232, 0);
+  --lg-tint-active: rgba(139, 174, 232, 0);
+
   position: relative;
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-top-color: rgba(255, 255, 255, 0.28); /* 顶部高光 */
-  box-shadow:
-    inset 0 1px 2px rgba(255, 255, 255, 0.08),
-    0 4px 24px rgba(0, 0, 0, 0.2);
-  color: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  padding: 12px 28px;
+  isolation: isolate; /* 让 z-index:-1 的高光层留在按钮内部 */
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px; /* 触控目标 ≥ 44px */
+  padding: 0 34px;
+  line-height: 1;
+  /* 固定数值圆角，不用 999px / 50% 这类胶囊写法。
+     18px 相对 48px 高度只占 37.5%（胶囊需要 24px），
+     再配合较宽的横向 padding，整体明确呈圆角矩形。 */
+  border-radius: 18px;
+
   font-family: var(--font-sans);
-  font-weight: 500;
   font-size: 0.95rem;
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
   cursor: pointer;
-}
+  -webkit-tap-highlight-color: transparent;
 
-.VPHome .VPHero .VPButton:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.25);
+  /* 玻璃本体：统一的半透明底色 + 可选着色层 */
+  background-color: var(--lg-fill);
+  background-image: linear-gradient(var(--lg-tint), var(--lg-tint));
+  /* 实时背景模糊 + 饱和度提升（两按钮同一参数） */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+  border: 1px solid rgba(255, 255, 255, 0.14);
+
   box-shadow:
-    inset 0 1px 2px rgba(255, 255, 255, 0.12),
-    0 0 24px rgba(107, 141, 212, 0.2); /* 品牌色微光晕 */
-  transform: translateY(-1px);
+    /* 极细内高光描边：玻璃上沿的亮边 */
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    /* 底部内阴影：表现材质厚度（越厚越明显） */
+    inset 0 -1.5px 3px rgba(0, 0, 0, 0.1),
+    /* 双层外阴影：紧贴的接触阴影 + 环境投影 */
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 8px 22px rgba(0, 0, 0, 0.16);
+
+  /* 文字边缘的轻微折射：极紧的半像素高光，不是光晕 */
+  text-shadow: 0 0.5px 0.5px rgba(255, 255, 255, 0.28);
+
+  transform: translateY(0) scale(1);
+  /* 回弹曲线（轻微过冲）用于释放时的弹性回复 */
+  transition:
+    transform 420ms cubic-bezier(0.34, 1.42, 0.64, 1),
+    background-color 260ms ease,
+    background-image 260ms ease,
+    border-color 260ms ease,
+    box-shadow 260ms ease;
 }
 
-/* 主按钮（浏览笔记）：伪元素 1px 渐变描边 */
-.VPHome .VPHero .VPButton.brand::before {
+/* 镜面高光：跟随指针的径向光斑 */
+.VPHome .VPHero .VPButton::before {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 12px;
-  padding: 1px;
-  background: linear-gradient(
-    135deg,
-    rgba(139, 174, 232, 0.9),
-    rgba(107, 141, 212, 0.3) 50%,
-    rgba(212, 168, 154, 0.6) /* 品牌蓝 → 暖粉渐变 */
-  );
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  z-index: -1; /* 在玻璃底色之上、文字之下 */
+  border-radius: inherit;
   pointer-events: none;
+  opacity: var(--lg-glow);
+  /* 强度经过实测校准：峰值约 +22 亮度。
+     过强会把悬停时的文字对比度压到 3:1 以下（AA 不达标），
+     Apple 的镜面高光本身也是克制的一层薄光。 */
+  background: radial-gradient(
+    120px circle at var(--lg-gx) var(--lg-gy),
+    rgba(255, 255, 255, 0.14),
+    rgba(255, 255, 255, 0.05) 40%,
+    transparent 70%
+  );
+  transition: opacity 220ms ease;
+}
+
+/* 玻璃表面静态光照：顶部镜面高光渐变 + 底部环境回光 */
+.VPHome .VPHero .VPButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.1) 38%,
+    rgba(255, 255, 255, 0) 55%,
+    rgba(255, 255, 255, 0) 80%,
+    rgba(255, 255, 255, 0.07) 100%
+  );
+}
+
+/* 悬停：上浮 + 充液（填充变实）+ 阴影加深 */
+.VPHome .VPHero .VPButton:hover {
+  --lg-glow: 1;
+  background-color: var(--lg-fill-hover);
+  background-image: linear-gradient(var(--lg-tint-hover), var(--lg-tint-hover));
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    inset 0 -1.5px 3px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.14),
+    0 14px 30px rgba(0, 0, 0, 0.22);
+}
+
+/* 按下：液态挤压（非等比压扁）+ 内部被点亮，阴影收缩 */
+.VPHome .VPHero .VPButton:active {
+  --lg-glow: 0.55;
+  background-color: var(--lg-fill-active);
+  background-image: linear-gradient(var(--lg-tint-active), var(--lg-tint-active));
+  transform: translateY(0) scale(0.965, 0.93);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.14),
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 3px 10px rgba(0, 0, 0, 0.14);
+  transition-duration: 90ms; /* 按下要跟手 */
+}
+
+/* 键盘焦点：保留清晰可见的焦点环（不被 overflow 裁掉） */
+.VPHome .VPHero .VPButton:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1.5px 3px rgba(0, 0, 0, 0.1),
+    0 0 0 2px rgba(11, 15, 25, 0.85),
+    0 0 0 4px var(--vp-c-brand-1),
+    0 8px 22px rgba(0, 0, 0, 0.16);
+}
+
+/* Tinting：Apple 强调「只给主要元素上色」，主按钮用品牌蓝着色玻璃。
+   只覆盖 --lg-tint-* 三个变量，不碰 --lg-fill-*、描边与阴影 ——
+   这样两个按钮的玻璃透明度、模糊、描边、内外阴影始终完全一致，
+   差异只体现在色调上（这正是 Apple tinting 的语义）。 */
+.VPHome .VPHero .VPButton.brand {
+  --lg-tint: rgba(139, 174, 232, 0.22);
+  --lg-tint-hover: rgba(139, 174, 232, 0.3);
+  --lg-tint-active: rgba(139, 174, 232, 0.38);
+}
+
+/* 无 backdrop-filter 支持时退化为半实心底，保证文字可读。
+   着色层（background-image）照常叠加，两按钮仍然只差色调。 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .VPHome .VPHero .VPButton {
+    background-color: rgba(26, 35, 50, 0.72);
+  }
 }
 
 /* 向下滚动指示箭头：循环 bounce */
@@ -275,6 +505,176 @@ html.dark {
 }
 
 /* ---------- 3. 导航栏：滚动前透明，滚动后 Liquid Glass ---------- */
+
+/* ====== 浅色模式 Hero 文字与按钮覆盖（深色文字 + 柔和玻璃按钮） ====== */
+
+/* 浅色模式可读性策略：一律不使用 text-shadow。
+   白色光晕会在笔画外围形成一圈亮于局部背景的晕，视觉上就是
+   「边缘泛白 + 发虚 + 描边感」，而且它只是把背景刷亮、并没有提高
+   笔画与背景的真实对比。改为让渐变遮罩在文字带铺出足够浅的底
+   （见上方 .hero-bg-overlay），笔画本身保持实心、边缘锐利。
+
+   注意：这里只改颜色与填充方式，不动字号 / 字重 / 行高 / 间距。 */
+
+/* 主标题：换用调色板中更深的品牌色 --vp-c-brand-3。
+   该变量在本文件第 35 行的注释即为「浅色模式下使用更深的品牌色保证对比度」，
+   所以这是沿用既有设计意图，不是引入新颜色。
+   同时清掉默认主题残留的 background-clip:text —— 浅色模式下
+   --vp-home-hero-name-background 并未定义，background-image 为 none，
+   裁切形同虚设，却会让字形走裁切合成路径、边缘抗锯齿不够干净。 */
+html:not(.dark) .VPHome .VPHero .name {
+  color: var(--vp-c-brand-3);
+  -webkit-text-fill-color: var(--vp-c-brand-3);
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+}
+
+/* 装饰行：深暖棕 accent。
+   浅色模式下取满不透明（基础规则为 0.92）：这行实际渲染 23.55px / 400 字重，
+   未达 WCAG「大字号」24px 门槛，需按 4.5:1 判定；
+   0.92 时实测 3.96:1，提到 1.0 后为 4.52:1。色相不变，仅取消半透明。 */
+html:not(.dark) .VPHome .VPHero .name::after {
+  color: rgb(122, 72, 55);
+  -webkit-text-fill-color: rgb(122, 72, 55);
+}
+
+/* 介绍文字：近黑深灰 */
+html:not(.dark) .VPHome .VPHero .text {
+  color: rgba(26, 35, 50, 0.95);
+  -webkit-text-fill-color: rgba(26, 35, 50, 0.95);
+}
+
+/* 副标题：深灰 */
+html:not(.dark) .VPHome .VPHero .tagline {
+  color: rgba(42, 54, 74, 0.9);
+  -webkit-text-fill-color: rgba(42, 54, 74, 0.9);
+}
+
+/* ===== 浅色模式 =====
+   Apple：材质颜色由周围内容决定，并智能地在明暗环境间适配。
+   浅色下玻璃更亮、上沿高光更锐、外阴影更轻 —— 主要靠内高光边和投影来界定形状。
+   这里只覆写玻璃本体的三个不透明度与配色，两个按钮共用同一组值。 */
+html:not(.dark) .VPHome .VPHero .VPButton {
+  --lg-fill: rgba(255, 255, 255, 0.5);
+  --lg-fill-hover: rgba(255, 255, 255, 0.62);
+  --lg-fill-active: rgba(255, 255, 255, 0.72);
+  background-color: var(--lg-fill);
+  border-color: rgba(255, 255, 255, 0.8);
+  color: #1e293b;
+  text-shadow: 0 0.5px 0.5px rgba(255, 255, 255, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 3px rgba(15, 23, 42, 0.05),
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 8px 20px rgba(15, 23, 42, 0.1);
+}
+
+html:not(.dark) .VPHome .VPHero .VPButton:hover {
+  background-color: var(--lg-fill-hover);
+  border-color: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    inset 0 -1.5px 3px rgba(15, 23, 42, 0.05),
+    0 2px 4px rgba(15, 23, 42, 0.07),
+    0 14px 28px rgba(15, 23, 42, 0.13);
+}
+
+html:not(.dark) .VPHome .VPHero .VPButton:active {
+  background-color: var(--lg-fill-active);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 2px rgba(15, 23, 42, 0.08),
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 3px 10px rgba(15, 23, 42, 0.09);
+}
+
+html:not(.dark) .VPHome .VPHero .VPButton:focus-visible {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 3px rgba(15, 23, 42, 0.05),
+    0 0 0 2px rgba(250, 250, 248, 0.9),
+    0 0 0 4px var(--vp-c-brand-1),
+    0 8px 20px rgba(15, 23, 42, 0.1);
+}
+
+/* 浅色下高光层改用更强的白，靠它来"提亮"玻璃表面 */
+html:not(.dark) .VPHome .VPHero .VPButton::after {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.18) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0) 82%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+}
+html:not(.dark) .VPHome .VPHero .VPButton::before {
+  background: radial-gradient(
+    120px circle at var(--lg-gx) var(--lg-gy),
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.18) 40%,
+    transparent 70%
+  );
+}
+
+/* 主按钮着色：浅色下用更深的品牌蓝（--vp-c-brand-1）。
+   同样只改着色层，玻璃本体与「关于」完全一致。 */
+html:not(.dark) .VPHome .VPHero .VPButton.brand {
+  --lg-tint: rgba(74, 111, 165, 0.14);
+  --lg-tint-hover: rgba(74, 111, 165, 0.2);
+  --lg-tint-active: rgba(74, 111, 165, 0.26);
+}
+
+html:not(.dark) .VPHome .VPHero .VPButton {
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html:not(.dark) .VPHome .VPHero .VPButton {
+    background-color: rgba(255, 255, 255, 0.92);
+  }
+}
+
+/* ===== 无障碍降级 =====
+   Apple 为 Liquid Glass 提供 Reduced Transparency / Reduced Motion，
+   开启后材质会退化但不失可用性与美感，这里做等价处理。 */
+
+/* 减少透明度：玻璃退化为实心底，保留高光与阴影层次 */
+@media (prefers-reduced-transparency: reduce) {
+  .VPHome .VPHero .VPButton {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: #1a2332;
+  }
+  html:not(.dark) .VPHome .VPHero .VPButton {
+    background-color: #ffffff;
+  }
+}
+
+/* 减少动效：关闭位移/缩放与指针高光流动，只保留颜色与阴影的短过渡 */
+@media (prefers-reduced-motion: reduce) {
+  .VPHome .VPHero .VPButton {
+    transition:
+      background-color 160ms linear,
+      border-color 160ms linear,
+      box-shadow 160ms linear;
+  }
+  .VPHome .VPHero .VPButton:hover,
+  .VPHome .VPHero .VPButton:active {
+    transform: none;
+    transition-duration: 120ms;
+  }
+  .VPHome .VPHero .VPButton::before {
+    display: none; /* 不做跟随指针的流动高光 */
+  }
+}
+
+/* 滚动箭头：深色 */
+html:not(.dark) .scroll-indicator {
+  color: rgba(100, 116, 139, 0.55);
+}
 
 /* 初始完全透明 */
 :root {

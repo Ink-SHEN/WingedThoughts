@@ -65,18 +65,23 @@ html.dark {
 
 ## 三个踩过的坑
 
-### 1. base 前缀导致背景图 404
+### 1. base 前缀导致背景图 404（已优化为响应式 picture）
 
-站点部署在 `/WingedThoughts/` 子路径，CSS 里写死 `url(/images/hero-bg.jpg)` 会 404。解决办法是在 Layout 里用 `withBase()` 注入 CSS 变量：
+站点部署在 `/WingedThoughts/` 子路径。早期方案是在 Layout 里用 `withBase()` 注入 CSS 变量：
 
 ```js
+// 旧方案：CSS var 注入（已替换）
 document.documentElement.style.setProperty(
   '--hero-bg-image',
   `url("${withBase('/images/hero-bg.jpg')}")`
 )
 ```
 
-CSS 中通过 `background-image: ..., var(--hero-bg-image)` 使用。
+**当前方案**（v2）：通过 `home-hero-info-before` 插槽注入响应式 `picture` 图层，支持 AVIF → WebP → JPEG 格式协商、5 档宽度自适应（640–2560px）、LQIP 渐进式占位与加载淡入。图片由离线脚本 `scripts/optimize-hero-bg.py` 生成到 `docs/public/images/hero/`，Layout.vue 通过 `hero-bg.js` 模块组装 srcset。
+
+> **插槽选型的坑**：`home-hero-before` 渲染在 `.VPHome` 下、是 `.VPHero` 的**兄弟节点**，
+> 用 `position: absolute; inset: 0` 会锚到错误的祖先元素。必须改用 `home-hero-info-before`
+> （渲染在 `.VPHero` 内部），再配合 `.VPHero { isolation: isolate }` 建立层叠上下文。
 
 ### 2. VitePress 1.x 的代码高亮没有 .token 类
 
