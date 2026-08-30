@@ -20,60 +20,13 @@ const onScroll = () => {
   )
 }
 
-/* ---- Liquid Glass 按钮：镜面高光跟随指针 ----
-   用 document 级委托，路由切换后无需重新绑定。
-   只写 CSS 变量，动画交给 CSS，避免每帧操作样式引起的额外回流。 */
-const HERO_BUTTON = '.VPHome .VPHero .VPButton'
-let rafId = 0
-let pending = null
-
-const flushPointer = () => {
-  rafId = 0
-  if (!pending) return
-  const { el, x, y } = pending
-  pending = null
-  el.style.setProperty('--lg-gx', `${x}%`)
-  el.style.setProperty('--lg-gy', `${y}%`)
-}
-
-const trackPointer = (el, clientX, clientY) => {
-  const r = el.getBoundingClientRect()
-  pending = {
-    el,
-    x: ((clientX - r.left) / r.width) * 100,
-    y: ((clientY - r.top) / r.height) * 100
-  }
-  if (!rafId) rafId = requestAnimationFrame(flushPointer)
-}
-
-const onPointerMove = (e) => {
-  // 触摸设备没有"悬停"，且高光会跟着手指乱跳，只对鼠标/触控笔生效
-  if (e.pointerType === 'touch') return
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-  const el = e.target.closest?.(HERO_BUTTON)
-  if (el) trackPointer(el, e.clientX, e.clientY)
-}
-
-// 指针进入时先定位，避免光斑从上一位置飘过来
-const onPointerOver = (e) => {
-  if (e.pointerType === 'touch') return
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-  const el = e.target.closest?.(HERO_BUTTON)
-  if (el) trackPointer(el, e.clientX, e.clientY)
-}
-
 onMounted(() => {
   onScroll()
   window.addEventListener('scroll', onScroll, { passive: true })
-  document.addEventListener('pointermove', onPointerMove, { passive: true })
-  document.addEventListener('pointerover', onPointerOver, { passive: true })
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', onScroll)
-  document.removeEventListener('pointermove', onPointerMove)
-  document.removeEventListener('pointerover', onPointerOver)
-  if (rafId) cancelAnimationFrame(rafId)
 })
 </script>
 
