@@ -1,11 +1,11 @@
-# About
+---
+title: About
+description: About Ink, why this site exists, and how to get in touch.
+aside: false
+---
 
-## Me
-An AI major, class of 2025 at ZJU.
+<script setup>
+import AboutPage from '../.vitepress/theme/components/AboutPage.vue'
+</script>
 
-## This Site
-A place for some of my random thoughts—probably quite messy.
-The home page is designed selfishly to show off my photos
-
-## Contact Me
-- GitHub: [Ink-SHEN](https://github.com/Ink-SHEN)
+<AboutPage locale="en" />
