@@ -26,7 +26,10 @@ export default defineConfig({
       themeConfig: {
         nav: [
           { text: '首页', link: '/' },
-          { text: '笔记', link: '/notes/' },
+          // activeMatch 走正则（VitePress 仅在提供该项时按前缀匹配）：
+          // 「笔记」排除 reading 子树，避免与「读书笔记」两个项同时高亮
+          { text: '笔记', link: '/notes/', activeMatch: '^/notes/(?!reading)' },
+          { text: '读书笔记', link: '/notes/reading/', activeMatch: '^/notes/reading/' },
           { text: '关于', link: '/about' }
         ],
         sidebar: {
@@ -74,7 +77,8 @@ export default defineConfig({
       themeConfig: {
         nav: [
           {text: 'home', link: '/en/'},
-          {text: 'notes', link: '/en/notes/'},
+          {text: 'notes', link: '/en/notes/', activeMatch: '^/en/notes/(?!reading)'},
+          {text: 'reading notes', link: '/en/notes/reading/', activeMatch: '^/en/notes/reading/'},
           {text: 'about', link: '/en/about'}
         ],
         sidebar: {
