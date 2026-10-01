@@ -43,6 +43,21 @@ export default defineConfig({
                     { text: '自定义主题', link: '/notes/website/CustomTheme' },
                     { text: '添加新笔记', link: '/notes/website/NewNote' }
                   ]
+                },
+                {
+                  text: '读书笔记',
+                  items: [
+                    { text: '总目录', link: '/notes/reading/' },
+                    {
+                      text: '新教伦理与资本主义精神',
+                      items: [
+                        { text: '一、韦伯的问题', link: '/notes/reading/the-protestant-ethic/01-the-problem' },
+                        { text: '二、路德的天职观', link: '/notes/reading/the-protestant-ethic/02-luther-and-beruf' },
+                        { text: '三、加尔文宗与入世禁欲', link: '/notes/reading/the-protestant-ethic/03-calvinism-and-innerworldly-asceticism' },
+                        { text: '四、从禁欲到铁笼', link: '/notes/reading/the-protestant-ethic/04-from-asceticism-to-iron-cage' }
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -75,6 +90,21 @@ export default defineConfig({
                     { text: 'Initial Construction', link: '/en/notes/website/InitialConstruction' },
                     { text: 'Custom Theme', link: '/en/notes/website/CustomTheme' },
                     { text: 'Adding a New Note', link: '/en/notes/website/NewNote' }
+                  ]
+                },
+                {
+                  text: 'Reading Notes',
+                  items: [
+                    { text: 'Index', link: '/en/notes/reading/' },
+                    {
+                      text: 'The Protestant Ethic and the Spirit of Capitalism',
+                      items: [
+                        { text: 'I. Weber\u2019s Question', link: '/en/notes/reading/the-protestant-ethic/01-the-problem' },
+                        { text: 'II. Luther and the Calling', link: '/en/notes/reading/the-protestant-ethic/02-luther-and-beruf' },
+                        { text: 'III. Calvinism and Innerworldly Asceticism', link: '/en/notes/reading/the-protestant-ethic/03-calvinism-and-innerworldly-asceticism' },
+                        { text: 'IV. From Asceticism to the Iron Cage', link: '/en/notes/reading/the-protestant-ethic/04-from-asceticism-to-iron-cage' }
+                      ]
+                    }
                   ]
                 }
               ]

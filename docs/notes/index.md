@@ -27,4 +27,12 @@
     </span>
     <span class="note-card-arrow">→</span>
   </a>
+  <a class="note-card" href="./reading/">
+    <span class="note-card-glyph">書</span>
+    <span class="note-card-body">
+      <span class="note-card-title">读书笔记</span>
+      <span class="note-card-desc">以书为纲：问题、论证与读后</span>
+    </span>
+    <span class="note-card-arrow">→</span>
+  </a>
 </div>

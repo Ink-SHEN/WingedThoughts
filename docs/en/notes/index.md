@@ -27,4 +27,12 @@ A collection of my learning notes and thoughts.
     </span>
     <span class="note-card-arrow">→</span>
   </a>
+  <a class="note-card" href="./reading/">
+    <span class="note-card-glyph">書</span>
+    <span class="note-card-body">
+      <span class="note-card-title">Reading Notes</span>
+      <span class="note-card-desc">By book: the question, the argument, the aftermath</span>
+    </span>
+    <span class="note-card-arrow">→</span>
+  </a>
 </div>
