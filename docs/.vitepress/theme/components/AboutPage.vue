@@ -7,10 +7,11 @@
  *
  * 设计来源：完整复用 docs/.vitepress/theme/custom.css 中已建立的视觉体系
  *   · 字体     --font-serif / --font-sans / --font-cjk-display（首页 Hero 同款字阶）
- *   · 色彩     --vp-c-brand-1/2/3、--vp-c-accent、--vp-c-text-1/2/3、--vp-c-border
- *   · 圆角     12（事实卡）/ 14（图片、卡片）/ 18（按钮与字母组合）
+ *   · 色彩     M3 角色（--md-primary-container / --md-surface-container-low 等）
+ *              + --vp-c-brand-1/2/3、--vp-c-text-1/2/3
+ *   · 圆角     16（事实卡 / 图片 / 卡片，M3 card shape）/ 20（字母组合）
  *   · 间距     8 / 12 / 16 / 24 / 32 / 48（与 .note-cards、.VPDocFooter 同源）
- *   · 动效     cubic-bezier(0.22, 1, 0.36, 1)，与首页 hero-rise、卡片 hover 一致
+ *   · 动效     M3 emphasized 曲线 var(--md-ease)，与首页 hero-rise、卡片 hover 一致
  *
  * 复用方式：根节点带 class="vp-doc"，直接继承站内已定义的
  *   .vp-doc p / h1 / h2 / blockquote / a 以及 .note-cards / .note-card /
@@ -177,8 +178,8 @@ const c = computed(() => aboutContent[props.locale])
   gap: 24px;
 }
 
-/* 字母组合：把 .note-card-glyph 的圆角方形放大到 72px，
-   圆角 18px 与首页 Hero 按钮一致，配色沿用品牌蓝描边语言 */
+/* 字母组合：M3 角色配色 —— primary-container 底 + on-primary-container 字，
+   圆角 20px（M3 large shape 与 extra-large 之间，呼应 72px 盒子的比例） */
 .about-monogram {
   flex: 0 0 auto;
   display: flex;
@@ -189,19 +190,10 @@ const c = computed(() => aboutContent[props.locale])
   font-family: var(--font-cjk-display);
   font-size: 32px;
   line-height: 1;
-  color: var(--vp-c-brand-2);
-  background: rgba(107, 141, 212, 0.06);
-  border: 1px solid rgba(107, 141, 212, 0.22);
-  border-radius: 18px;
-}
-
-/* 浅色模式：字形换用 brand-3（与首页 h1 在 light 下的深色品牌色同档）。
-   brand-2(#6b8dd4) 在淡底加 6% 同色底上实测 ~2.96:1，刚好低于
-   WCAG 1.4.11 图形对象 3:1 阈值；brand-3(#3a5a8c) 实测 ~6.25:1 通过。
-   装饰元素 aria-hidden=true 严格说不强制，但字形承担「作者识别」语义，
-   仍按 3:1 兜底。 */
-html:not(.dark) .about-monogram {
-  color: var(--vp-c-brand-3);
+  color: var(--md-on-primary-container);
+  background: var(--md-primary-container);
+  border: none;
+  border-radius: 20px;
 }
 
 /* 拉丁字母组合（英文页的 "Ink"）：三字符较宽，字号下调一档 */
@@ -238,9 +230,9 @@ html:not(.dark) .about-monogram {
 
 .about-fact {
   padding: 16px 18px;
-  background: var(--vp-c-bg-alt);
-  border: 1px solid var(--vp-c-border);
-  border-radius: 12px;
+  background: var(--md-surface-container-low);
+  border: 1px solid var(--md-outline-variant);
+  border-radius: 16px; /* M3 card shape */
 }
 
 .about-fact dt {
@@ -268,8 +260,9 @@ html:not(.dark) .about-monogram {
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid var(--vp-c-border);
-  border-radius: 14px;
+  border: 1px solid var(--md-outline-variant);
+  border-radius: 16px; /* M3 card shape */
+  box-shadow: var(--md-shadow-1);
 }
 
 .about-figure figcaption {
@@ -308,12 +301,12 @@ html.dark .about-figure figcaption {
   justify-content: center;
 }
 
-/* ---------- 焦点可见：键盘可达（沿用站内品牌色双环语言） ---------- */
+/* ---------- 焦点可见：键盘可达（M3 focus indicator 双环语言） ---------- */
 .about a:focus-visible {
   outline: none;
   box-shadow:
     0 0 0 2px var(--vp-c-bg),
-    0 0 0 4px var(--vp-c-brand-1);
+    0 0 0 4px var(--md-primary);
 }
 
 /* ---------- 仅供读屏的补充说明 ---------- */
@@ -329,7 +322,7 @@ html.dark .about-figure figcaption {
   border: 0;
 }
 
-/* ---------- 入场动效：与首页 hero-rise 同缓动，逐级 stagger ---------- */
+/* ---------- 入场动效：M3 emphasized 曲线，逐级 stagger ---------- */
 @keyframes about-rise {
   from {
     opacity: 0;
@@ -344,7 +337,7 @@ html.dark .about-figure figcaption {
 .about-eyebrow,
 .about-head-main,
 .about-section {
-  animation: about-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: about-rise var(--md-dur-4) var(--md-ease) both;
 }
 .about-eyebrow { animation-delay: 0.05s; }
 .about-head-main { animation-delay: 0.12s; }

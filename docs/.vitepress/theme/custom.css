@@ -1,16 +1,19 @@
 /* ==========================================================================
    WingedThoughts 自定义主题样式
-   设计定位：Linear.app 极简深色骨架 + 跨海大桥日落照片的人文暖调
+   设计定位：Google Material Design 3 骨架 + 跨海大桥日落照片的人文暖调
+   （M3 色彩角色 / state layer / elevation / emphasized 动效 + 衬线体人文排印）
    结构：
      0. 字体引入（CDN）
-     1. 设计 Token（颜色 / 字体，dark + light 双套）
-     2. 首页 Hero（全屏照片背景 / 淡入动画 / Liquid Glass 按钮 / 滚动箭头）
-     3. 导航栏（透明 → 毛玻璃）
+     1. 设计 Token（颜色 / 字体 / M3 角色 / M3 动效，dark + light 双套）
+     2. 首页 Hero（全屏照片背景 / 淡入动画 / M3 Filled+Tonal 按钮 / 滚动箭头）
+     3. 导航栏（透明 → 毛玻璃 surface；菜单项 M3 胶囊导航态）
      4. 代码块（Stripe 风格：macOS 窗口栏 / 行号 / 语法高亮）
      5. 文章页（版心 / 引用块 / 表格）
-     6. 侧边栏与右侧目录
-     7. Feature 卡片（极简文字 + 细线）
-     8. 滚动条与选区
+     6. 侧边栏与右侧目录（M3 导航抽屉形态）
+     7. Feature 卡片（M3 filled card）
+     8. 笔记目录卡片与翻页器（M3 interactive card + state layer）
+     9. 滚动条与选区
+    10. Material 涟漪与滚动入场动效（由 Layout.vue 驱动）
    ========================================================================== */
 
 /* ---------- 0. 字体引入（Google Fonts + 霞鹜文楷 CDN） ---------- */
@@ -37,6 +40,30 @@
   --vp-c-brand-2: #6b8dd4;
   --vp-c-brand-3: #3a5a8c;
   --vp-c-accent: #d4a89a; /* 暖色点缀：天空灰粉 */
+
+  /* ---- Material Design 3 色彩角色（seed = 品牌蓝 #4a6fa5，色相 215°） ----
+     对照 M3 规范：filled 按钮用 primary/on-primary，
+     tonal 按钮与 glyph 容器用 primary-container/on-primary-container，
+     卡片用 surface-container 分层 + outline-variant 描边。 */
+  --md-primary: #4a6fa5;
+  --md-on-primary: #ffffff;
+  --md-primary-container: #dbe6f7;
+  --md-on-primary-container: #0f2440;
+  --md-surface-container-low: #f2f4f7;
+  --md-surface-container: #eceff4;
+  --md-outline-variant: #dfe4ec;
+  --md-nav-active-bg: rgba(74, 111, 165, 0.1);
+
+  /* M3 动效：emphasized 曲线 cubic-bezier(0.2, 0, 0, 1) + 档位时长 */
+  --md-ease: cubic-bezier(0.2, 0, 0, 1);
+  --md-dur-1: 150ms;
+  --md-dur-2: 250ms;
+  --md-dur-3: 400ms;
+  --md-dur-4: 560ms;
+
+  /* M3 elevation：1 档（静置卡片/按钮）与 2 档（悬浮） */
+  --md-shadow-1: 0 1px 2px rgba(16, 24, 40, 0.12), 0 1px 3px rgba(16, 24, 40, 0.08);
+  --md-shadow-2: 0 2px 6px rgba(16, 24, 40, 0.14), 0 8px 20px rgba(16, 24, 40, 0.1);
 
   /* 背景层级（浅色：暖白） */
   --vp-c-bg: #fafaf8;
@@ -78,6 +105,20 @@ html.dark {
   /* 分割线、边框 */
   --vp-c-divider: #1e293b;
   --vp-c-border: rgba(255, 255, 255, 0.08);
+
+  /* ---- Material Design 3 色彩角色（深色：primary 提亮为 tone 80） ---- */
+  --md-primary: #a9c6ef;
+  --md-on-primary: #0c2340;
+  --md-primary-container: #2c4a73;
+  --md-on-primary-container: #dbe6f7;
+  --md-surface-container-low: #111827;
+  --md-surface-container: #161e2d;
+  --md-outline-variant: #263144;
+  --md-nav-active-bg: rgba(107, 141, 212, 0.16);
+
+  /* 深色下阴影需要更重才能被看见 */
+  --md-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.42), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --md-shadow-2: 0 2px 6px rgba(0, 0, 0, 0.46), 0 10px 24px rgba(0, 0, 0, 0.34);
 }
 
 /* ---------- 2. 首页 Hero ---------- */
@@ -273,7 +314,7 @@ html:not(.dark) .hero-bg-img {
   }
 }
 
-/* 标题淡入动画（纯 CSS，ease-out-expo） */
+/* 标题淡入动画（纯 CSS，M3 emphasized 曲线） */
 @keyframes hero-rise {
   from {
     opacity: 0;
@@ -286,16 +327,16 @@ html:not(.dark) .hero-bg-img {
 }
 
 .VPHome .VPHero .name {
-  animation: hero-rise 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+  animation: hero-rise 1s cubic-bezier(0.2, 0, 0, 1) 0.2s both;
 }
 .VPHome .VPHero .text {
-  animation: hero-rise 1s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+  animation: hero-rise 1s cubic-bezier(0.2, 0, 0, 1) 0.35s both;
 }
 .VPHome .VPHero .tagline {
-  animation: hero-rise 1s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+  animation: hero-rise 1s cubic-bezier(0.2, 0, 0, 1) 0.5s both;
 }
 .VPHome .VPHero .action {
-  animation: hero-rise 1s cubic-bezier(0.22, 1, 0.36, 1) 0.7s both;
+  animation: hero-rise 1s cubic-bezier(0.2, 0, 0, 1) 0.7s both;
 }
 /* 按钮间 stagger 0.1s */
 .VPHome .VPHero .action:nth-child(2) {
@@ -303,184 +344,91 @@ html:not(.dark) .hero-bg-img {
 }
 
 /* ==========================================================================
-   Hero 按钮 — Apple Liquid Glass（iOS 26 / macOS Tahoe）复刻
-   材质分层（对应 Liquid Glass「由多层组成，持续改变色调/阴影/动态范围」）：
-     1. backdrop-filter blur+saturate  → 玻璃下方的实时背景模糊层
-     2. background-color（低不透明）    → 玻璃本体色调
-     3. ::after 顶部渐变 + 底部回光      → 镜面高光 specular + 环境反射
-     4. ::before 跟随指针的径向光斑      → 移动时的镜面响应
-     5. box-shadow inset 顶亮/底暗      → 极细内高光描边 + 材质厚度的内阴影
-     6. box-shadow 双层外阴影           → 与背景的轻量区隔（上浮时加深）
+   Hero 按钮 — Material Design 3（Filled + Filled Tonal）
+   规范要点：
+     · 形状：全圆角胶囊（M3 full shape），高度 48px（≥ 触控目标 44px）
+     · 层级：主操作 = Filled（primary 实心），次操作 = Filled Tonal（primary-container）
+     · 交互：state layer（::before 叠 currentColor，hover 8% / focus 10% / pressed 12%）
+            + 悬浮时 elevation 提升一档；不做位移/缩放（M3 的克制感来源）
+     · 动效：M3 emphasized 曲线 var(--md-ease)
+     · 涟漪：Layout.vue 在 pointerdown 注入 .md-ripple（currentColor 扩散）
    ========================================================================== */
 
 .VPHome .VPHero .VPButton {
-  /* 指针高光坐标与可见度，由 Layout.vue 的 pointermove 写入 */
-  --lg-gx: 50%;
-  --lg-gy: 50%;
-  --lg-glow: 0;
-
-  /* ===== 液态玻璃参数 =====
-     两个按钮共用同一套值：玻璃本体（--lg-fill-*）与着色层（--lg-tint-*）是
-     两个独立的图层，叠加而非互相替换。
-     .brand 只允许改 --lg-tint-*（Apple 的 tinting 用于强调主操作），
-     不再覆写 background-color —— 否则两个按钮的"透明度"会实打实地不一致，
-     浅色下就会一个像白玻璃、一个像淡蓝雾。
-     模糊强度 / 描边 / 内外阴影同理，只写在下面这一处，两按钮天然相同。 */
-  --lg-fill: rgba(255, 255, 255, 0.1);
-  --lg-fill-hover: rgba(255, 255, 255, 0.16);
-  --lg-fill-active: rgba(255, 255, 255, 0.22);
-  --lg-tint: rgba(139, 174, 232, 0);
-  --lg-tint-hover: rgba(139, 174, 232, 0);
-  --lg-tint-active: rgba(139, 174, 232, 0);
-
   position: relative;
-  isolation: isolate; /* 让 z-index:-1 的高光层留在按钮内部 */
+  overflow: hidden; /* 裁住 state layer 与涟漪 */
+  isolation: isolate;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 48px; /* 触控目标 ≥ 44px */
-  padding: 0 34px;
+  padding: 0 28px;
   line-height: 1;
-  /* 固定数值圆角，不用 999px / 50% 这类胶囊写法。
-     18px 相对 48px 高度只占 37.5%（胶囊需要 24px），
-     再配合较宽的横向 padding，整体明确呈圆角矩形。 */
-  border-radius: 18px;
+  border: none;
+  border-radius: 999px; /* M3 full shape */
 
   font-family: var(--font-sans);
   font-size: 0.95rem;
   font-weight: 500;
   letter-spacing: 0.01em;
-  color: rgba(255, 255, 255, 0.92);
   white-space: nowrap;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 
-  /* 玻璃本体：统一的半透明底色 + 可选着色层 */
-  background-color: var(--lg-fill);
-  background-image: linear-gradient(var(--lg-tint), var(--lg-tint));
-  /* 实时背景模糊 + 饱和度提升（两按钮同一参数） */
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-
-  border: 1px solid rgba(255, 255, 255, 0.14);
-
-  box-shadow:
-    /* 极细内高光描边：玻璃上沿的亮边 */
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    /* 底部内阴影：表现材质厚度（越厚越明显） */
-    inset 0 -1.5px 3px rgba(0, 0, 0, 0.1),
-    /* 双层外阴影：紧贴的接触阴影 + 环境投影 */
-    0 1px 2px rgba(0, 0, 0, 0.12),
-    0 8px 22px rgba(0, 0, 0, 0.16);
-
-  /* 文字边缘的轻微折射：极紧的半像素高光，不是光晕 */
-  text-shadow: 0 0.5px 0.5px rgba(255, 255, 255, 0.28);
-
-  transform: translateY(0) scale(1);
-  /* 回弹曲线（轻微过冲）用于释放时的弹性回复 */
   transition:
-    transform 420ms cubic-bezier(0.34, 1.42, 0.64, 1),
-    background-color 260ms ease,
-    background-image 260ms ease,
-    border-color 260ms ease,
-    box-shadow 260ms ease;
+    background-color var(--md-dur-2) var(--md-ease),
+    box-shadow var(--md-dur-2) var(--md-ease);
 }
 
-/* 镜面高光：跟随指针的径向光斑 */
+/* M3 state layer：唯一的高光机制，透明度按状态档位变化（8/10/12%） */
 .VPHome .VPHero .VPButton::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1; /* 在玻璃底色之上、文字之下 */
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: var(--lg-glow);
-  /* 强度经过实测校准：峰值约 +22 亮度。
-     过强会把悬停时的文字对比度压到 3:1 以下（AA 不达标），
-     Apple 的镜面高光本身也是克制的一层薄光。 */
-  background: radial-gradient(
-    120px circle at var(--lg-gx) var(--lg-gy),
-    rgba(255, 255, 255, 0.14),
-    rgba(255, 255, 255, 0.05) 40%,
-    transparent 70%
-  );
-  transition: opacity 220ms ease;
-}
-
-/* 玻璃表面静态光照：顶部镜面高光渐变 + 底部环境回光 */
-.VPHome .VPHero .VPButton::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
   border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-dur-1) linear;
   pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.3) 0%,
-    rgba(255, 255, 255, 0.1) 38%,
-    rgba(255, 255, 255, 0) 55%,
-    rgba(255, 255, 255, 0) 80%,
-    rgba(255, 255, 255, 0.07) 100%
-  );
 }
+.VPHome .VPHero .VPButton:hover::before { opacity: 0.08; }
+.VPHome .VPHero .VPButton:focus-visible::before { opacity: 0.1; }
+.VPHome .VPHero .VPButton:active::before { opacity: 0.12; }
 
-/* 悬停：上浮 + 充液（填充变实）+ 阴影加深 */
-.VPHome .VPHero .VPButton:hover {
-  --lg-glow: 1;
-  background-color: var(--lg-fill-hover);
-  background-image: linear-gradient(var(--lg-tint-hover), var(--lg-tint-hover));
-  border-color: rgba(255, 255, 255, 0.22);
-  transform: translateY(-2px) scale(1.02);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.38),
-    inset 0 -1.5px 3px rgba(0, 0, 0, 0.1),
-    0 2px 4px rgba(0, 0, 0, 0.14),
-    0 14px 30px rgba(0, 0, 0, 0.22);
-}
-
-/* 按下：液态挤压（非等比压扁）+ 内部被点亮，阴影收缩 */
-.VPHome .VPHero .VPButton:active {
-  --lg-glow: 0.55;
-  background-color: var(--lg-fill-active);
-  background-image: linear-gradient(var(--lg-tint-active), var(--lg-tint-active));
-  transform: translateY(0) scale(0.965, 0.93);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.14),
-    0 1px 2px rgba(0, 0, 0, 0.12),
-    0 3px 10px rgba(0, 0, 0, 0.14);
-  transition-duration: 90ms; /* 按下要跟手 */
-}
-
-/* 键盘焦点：保留清晰可见的焦点环（不被 overflow 裁掉） */
-.VPHome .VPHero .VPButton:focus-visible {
-  outline: none;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    inset 0 -1.5px 3px rgba(0, 0, 0, 0.1),
-    0 0 0 2px rgba(11, 15, 25, 0.85),
-    0 0 0 4px var(--vp-c-brand-1),
-    0 8px 22px rgba(0, 0, 0, 0.16);
-}
-
-/* Tinting：Apple 强调「只给主要元素上色」，主按钮用品牌蓝着色玻璃。
-   只覆盖 --lg-tint-* 三个变量，不碰 --lg-fill-*、描边与阴影 ——
-   这样两个按钮的玻璃透明度、模糊、描边、内外阴影始终完全一致，
-   差异只体现在色调上（这正是 Apple tinting 的语义）。 */
+/* Filled：主操作。浅色 #4a6fa5/白字 5.1:1，深色 #a9c6ef/#0c2340 ≈ 9.5:1，均过 AA */
 .VPHome .VPHero .VPButton.brand {
-  --lg-tint: rgba(139, 174, 232, 0.22);
-  --lg-tint-hover: rgba(139, 174, 232, 0.3);
-  --lg-tint-active: rgba(139, 174, 232, 0.38);
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  box-shadow: var(--md-shadow-1);
+}
+.VPHome .VPHero .VPButton.brand:hover {
+  box-shadow: var(--md-shadow-2); /* elevation 1 → 2 */
+}
+.VPHome .VPHero .VPButton.brand:active {
+  box-shadow: var(--md-shadow-1);
 }
 
-/* 无 backdrop-filter 支持时退化为半实心底，保证文字可读。
-   着色层（background-image）照常叠加，两按钮仍然只差色调。 */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .VPHome .VPHero .VPButton {
-    background-color: rgba(26, 35, 50, 0.72);
-  }
+/* Filled Tonal：次操作。浅色 #dbe6f7/#0f2440 ≈ 13.7:1，深色 #2c4a73/#dbe6f7 ≈ 7.5:1 */
+.VPHome .VPHero .VPButton.alt {
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+}
+.VPHome .VPHero .VPButton.alt:hover {
+  box-shadow: var(--md-shadow-1);
+}
+.VPHome .VPHero .VPButton.alt:active {
+  box-shadow: none;
+}
+
+/* 键盘焦点：M3 focus indicator —— 2px 主色描边 + 3px 偏移 */
+.VPHome .VPHero .VPButton:focus-visible {
+  outline: 2px solid var(--md-primary);
+  outline-offset: 3px;
+}
+html:not(.dark) .VPHome .VPHero .VPButton:focus-visible {
+  outline-color: var(--vp-c-brand-1);
 }
 
 /* 向下滚动指示箭头：循环 bounce */
@@ -504,7 +452,7 @@ html:not(.dark) .hero-bg-img {
   }
 }
 
-/* ---------- 3. 导航栏：滚动前透明，滚动后 Liquid Glass ---------- */
+/* ---------- 3. 导航栏：滚动前透明，滚动后 M3 surface + elevation ---------- */
 
 /* ====== 浅色模式 Hero 文字与按钮覆盖（深色文字 + 柔和玻璃按钮） ====== */
 
@@ -551,123 +499,15 @@ html:not(.dark) .VPHome .VPHero .tagline {
   -webkit-text-fill-color: rgba(42, 54, 74, 0.9);
 }
 
-/* ===== 浅色模式 =====
-   Apple：材质颜色由周围内容决定，并智能地在明暗环境间适配。
-   浅色下玻璃更亮、上沿高光更锐、外阴影更轻 —— 主要靠内高光边和投影来界定形状。
-   这里只覆写玻璃本体的三个不透明度与配色，两个按钮共用同一组值。 */
-html:not(.dark) .VPHome .VPHero .VPButton {
-  --lg-fill: rgba(255, 255, 255, 0.5);
-  --lg-fill-hover: rgba(255, 255, 255, 0.62);
-  --lg-fill-active: rgba(255, 255, 255, 0.72);
-  background-color: var(--lg-fill);
-  border-color: rgba(255, 255, 255, 0.8);
-  color: #1e293b;
-  text-shadow: 0 0.5px 0.5px rgba(255, 255, 255, 0.55);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1.5px 3px rgba(15, 23, 42, 0.05),
-    0 1px 2px rgba(15, 23, 42, 0.06),
-    0 8px 20px rgba(15, 23, 42, 0.1);
-}
+/* ===== 无障碍降级 ===== */
 
-html:not(.dark) .VPHome .VPHero .VPButton:hover {
-  background-color: var(--lg-fill-hover);
-  border-color: rgba(255, 255, 255, 0.95);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.98),
-    inset 0 -1.5px 3px rgba(15, 23, 42, 0.05),
-    0 2px 4px rgba(15, 23, 42, 0.07),
-    0 14px 28px rgba(15, 23, 42, 0.13);
-}
-
-html:not(.dark) .VPHome .VPHero .VPButton:active {
-  background-color: var(--lg-fill-active);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 -1px 2px rgba(15, 23, 42, 0.08),
-    0 1px 2px rgba(15, 23, 42, 0.06),
-    0 3px 10px rgba(15, 23, 42, 0.09);
-}
-
-html:not(.dark) .VPHome .VPHero .VPButton:focus-visible {
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1.5px 3px rgba(15, 23, 42, 0.05),
-    0 0 0 2px rgba(250, 250, 248, 0.9),
-    0 0 0 4px var(--vp-c-brand-1),
-    0 8px 20px rgba(15, 23, 42, 0.1);
-}
-
-/* 浅色下高光层改用更强的白，靠它来"提亮"玻璃表面 */
-html:not(.dark) .VPHome .VPHero .VPButton::after {
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0.18) 40%,
-    rgba(255, 255, 255, 0) 60%,
-    rgba(255, 255, 255, 0) 82%,
-    rgba(255, 255, 255, 0.1) 100%
-  );
-}
-html:not(.dark) .VPHome .VPHero .VPButton::before {
-  background: radial-gradient(
-    120px circle at var(--lg-gx) var(--lg-gy),
-    rgba(255, 255, 255, 0.6),
-    rgba(255, 255, 255, 0.18) 40%,
-    transparent 70%
-  );
-}
-
-/* 主按钮着色：浅色下用更深的品牌蓝（--vp-c-brand-1）。
-   同样只改着色层，玻璃本体与「关于」完全一致。 */
-html:not(.dark) .VPHome .VPHero .VPButton.brand {
-  --lg-tint: rgba(74, 111, 165, 0.14);
-  --lg-tint-hover: rgba(74, 111, 165, 0.2);
-  --lg-tint-active: rgba(74, 111, 165, 0.26);
-}
-
-html:not(.dark) .VPHome .VPHero .VPButton {
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
-}
-
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  html:not(.dark) .VPHome .VPHero .VPButton {
-    background-color: rgba(255, 255, 255, 0.92);
-  }
-}
-
-/* ===== 无障碍降级 =====
-   Apple 为 Liquid Glass 提供 Reduced Transparency / Reduced Motion，
-   开启后材质会退化但不失可用性与美感，这里做等价处理。 */
-
-/* 减少透明度：玻璃退化为实心底，保留高光与阴影层次 */
-@media (prefers-reduced-transparency: reduce) {
-  .VPHome .VPHero .VPButton {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background-color: #1a2332;
-  }
-  html:not(.dark) .VPHome .VPHero .VPButton {
-    background-color: #ffffff;
-  }
-}
-
-/* 减少动效：关闭位移/缩放与指针高光流动，只保留颜色与阴影的短过渡 */
+/* 减少动效：关闭 state layer 渐变与阴影过渡，直接呈现终态（涟漪由 JS 侧关闭） */
 @media (prefers-reduced-motion: reduce) {
   .VPHome .VPHero .VPButton {
-    transition:
-      background-color 160ms linear,
-      border-color 160ms linear,
-      box-shadow 160ms linear;
-  }
-  .VPHome .VPHero .VPButton:hover,
-  .VPHome .VPHero .VPButton:active {
-    transform: none;
-    transition-duration: 120ms;
+    transition: none;
   }
   .VPHome .VPHero .VPButton::before {
-    display: none; /* 不做跟随指针的流动高光 */
+    transition: none;
   }
 }
 
@@ -692,13 +532,13 @@ html.dark.scrolled {
 html.scrolled .VPNavBar .content-body {
   backdrop-filter: blur(20px) saturate(150%);
   -webkit-backdrop-filter: blur(20px) saturate(150%);
-  transition: background-color 0.3s ease;
+  transition: background-color var(--md-dur-2) var(--md-ease);
 }
 
 /* 底部 1px 分隔线仅在滚动后出现 */
 .VPNavBar .divider {
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--md-dur-2) var(--md-ease);
 }
 html.scrolled .VPNavBar .divider {
   opacity: 1;
@@ -709,6 +549,33 @@ html.scrolled .VPNavBar .divider {
   font-family: var(--font-serif);
   font-weight: 700;
   letter-spacing: -0.01em;
+}
+
+/* 导航菜单项：M3 导航态 —— 胶囊形 state layer。
+   默认主题把 line-height 绑死为导航高度，先收敛行高才能看出胶囊形状。 */
+.VPNavBar .VPNavBarMenu .VPNavBarMenuLink,
+.VPNavBar .VPNavBarMenuGroup .button {
+  padding: 0 14px;
+  line-height: 34px;
+  border-radius: 999px;
+  transition:
+    color var(--md-dur-2) var(--md-ease),
+    background-color var(--md-dur-2) var(--md-ease);
+}
+.VPNavBar .VPNavBarMenu .VPNavBarMenuLink:hover,
+.VPNavBar .VPNavBarMenuGroup .button:hover {
+  background-color: color-mix(in srgb, var(--vp-c-text-1) 7%, transparent);
+}
+/* 当前栏目：primary 容器色胶囊（M3 active indicator） */
+.VPNavBar .VPNavBarMenu .VPNavBarMenuLink.active {
+  color: var(--vp-c-brand-1);
+  background-color: var(--md-nav-active-bg);
+}
+
+/* 下拉浮层：M3 菜单圆角（12px）+ elevation */
+.VPNavBar .VPFlyout .menu {
+  border-radius: 12px;
+  box-shadow: var(--md-shadow-2);
 }
 
 /* ---------- 4. 代码块（Stripe 风格） ---------- */
@@ -892,24 +759,20 @@ html:not(.dark) .vp-doc tr:nth-child(even) td {
   background-color: var(--vp-c-bg);
 }
 
-/* 选中项：左侧 2px 品牌色指示条 + 品牌色微底 */
+/* 选中项：M3 导航抽屉形态 —— 圆角胶囊 + primary 容器底色（取消左侧指示条） */
 .VPSidebar .VPLink .link {
   position: relative;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
+  border-radius: 10px;
+  transition: background-color var(--md-dur-2) var(--md-ease);
+}
+.VPSidebar .VPLink .link:hover {
+  background: color-mix(in srgb, var(--vp-c-text-1) 5%, transparent);
 }
 .VPSidebar .VPLink .link.active {
-  background: rgba(107, 141, 212, 0.08);
+  background: var(--md-nav-active-bg);
 }
-.VPSidebar .VPLink .link.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 6px;
-  bottom: 6px;
-  width: 2px;
-  border-radius: 2px;
-  background: var(--vp-c-brand-1);
+.VPSidebar .VPLink .link.active:hover {
+  background: color-mix(in srgb, var(--vp-c-brand-1) 14%, transparent);
 }
 
 /* 右侧 TOC：当前章节品牌色高亮，字体 13px，增加呼吸感 */
@@ -922,20 +785,23 @@ html:not(.dark) .vp-doc tr:nth-child(even) td {
   color: var(--vp-c-brand-1);
 }
 
-/* ---------- 7. Feature 卡片：去色块，极简文字 + 细线分隔 ---------- */
+/* ---------- 7. Feature 卡片：M3 filled card（surface 容器 + outline 描边） ---------- */
 
 .VPHome .VPHomeFeatures {
   background-color: var(--vp-c-bg);
 }
 .VPHome .VPFeature {
-  background-color: transparent;
-  border: none;
-  border-radius: 0;
-  transition: none;
+  background-color: var(--md-surface-container-low);
+  border: 1px solid var(--md-outline-variant);
+  border-radius: 16px; /* M3 card shape */
+  transition:
+    background-color var(--md-dur-3) var(--md-ease),
+    border-color var(--md-dur-3) var(--md-ease),
+    box-shadow var(--md-dur-3) var(--md-ease);
 }
-.VPHome .VPFeature .box {
-  padding: 24px 8px 8px;
-  border-top: 1px solid var(--vp-c-divider);
+.VPHome .VPFeature:hover {
+  background-color: var(--md-surface-container);
+  box-shadow: var(--md-shadow-1);
 }
 .VPHome .VPFeature .title {
   font-family: var(--font-serif);
@@ -944,7 +810,9 @@ html:not(.dark) .vp-doc tr:nth-child(even) td {
 
 /* ---------- 8. 笔记目录卡片与翻页器 ---------- */
 
-/* 目录页图形化入口卡片 */
+/* 目录页图形化入口卡片：M3 interactive card
+   静置 = surface-container-low + outline-variant 描边（elevation 0），
+   悬浮 = state layer + elevation 1，按下涟漪由 Layout.vue 注入 */
 .vp-doc .note-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -952,20 +820,41 @@ html:not(.dark) .vp-doc tr:nth-child(even) td {
   margin: 32px 0;
 }
 .vp-doc a.note-card {
+  position: relative;
+  overflow: hidden; /* 裁住涟漪 */
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 20px;
-  border: 1px solid var(--vp-c-border);
-  border-radius: 14px;
-  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--md-outline-variant);
+  border-radius: 16px; /* M3 card shape */
+  background: var(--md-surface-container-low);
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color var(--md-dur-3) var(--md-ease),
+    border-color var(--md-dur-3) var(--md-ease),
+    box-shadow var(--md-dur-3) var(--md-ease);
+}
+/* M3 state layer：on-surface 4%（悬浮）/ 6%（按下），比按钮更克制 */
+.vp-doc a.note-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-dur-1) linear;
+  pointer-events: none;
 }
 .vp-doc a.note-card:hover {
-  border-color: rgba(107, 141, 212, 0.45);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(107, 141, 212, 0.12);
+  border-color: color-mix(in srgb, var(--vp-c-brand-1) 35%, var(--md-outline-variant));
+  box-shadow: var(--md-shadow-1);
+}
+.vp-doc a.note-card:hover::before {
+  opacity: 0.04;
+}
+.vp-doc a.note-card:active::before {
+  opacity: 0.06;
 }
 .vp-doc .note-card-glyph {
   flex-shrink: 0;
@@ -978,15 +867,14 @@ html:not(.dark) .vp-doc tr:nth-child(even) td {
   font-style: italic;
   font-size: 20px;
   line-height: 1; /* 去掉行盒残余高度，保证字形视觉居中 */
-  color: var(--vp-c-brand-2);
-  background: rgba(107, 141, 212, 0.06);
-  border: 1px solid rgba(107, 141, 212, 0.22);
-  border-radius: 10px;
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  color: var(--md-on-primary-container);
+  background: var(--md-primary-container);
+  border-radius: 12px; /* M3 medium shape */
+  transition: border-radius var(--md-dur-3) var(--md-ease);
 }
+/* 悬浮时 glyph 形状 morph：medium → small（M3 形状语言里表达「被激活」） */
 .vp-doc a.note-card:hover .note-card-glyph {
-  background: rgba(107, 141, 212, 0.12);
-  border-color: rgba(107, 141, 212, 0.4);
+  border-radius: 8px;
 }
 .vp-doc .note-card-body {
   display: flex;
@@ -1009,23 +897,29 @@ html:not(.dark) .vp-doc tr:nth-child(even) td {
   margin-left: auto;
   font-family: var(--font-sans);
   color: var(--vp-c-text-3);
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    color var(--md-dur-2) var(--md-ease),
+    transform var(--md-dur-2) var(--md-ease);
 }
 .vp-doc a.note-card:hover .note-card-arrow {
   color: var(--vp-c-brand-1);
   transform: translateX(4px);
 }
 
-/* 上一页/下一页翻页器：卡片化 + 方向箭头 */
+/* 上一页/下一页翻页器：与 note-card 同一套 M3 卡片语言 */
 .VPDocFooter .pager-link {
-  border: 1px solid var(--vp-c-border);
-  border-radius: 12px;
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden; /* 裁住涟漪 */
+  border: 1px solid var(--md-outline-variant);
+  border-radius: 16px;
+  background: var(--md-surface-container-low);
+  transition:
+    background-color var(--md-dur-3) var(--md-ease),
+    border-color var(--md-dur-3) var(--md-ease),
+    box-shadow var(--md-dur-3) var(--md-ease);
 }
 .VPDocFooter .pager-link:hover {
-  border-color: rgba(107, 141, 212, 0.45);
-  box-shadow: 0 4px 24px rgba(107, 141, 212, 0.1);
-  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--vp-c-brand-1) 35%, var(--md-outline-variant));
+  box-shadow: var(--md-shadow-1);
 }
 .VPDocFooter .pager-link .desc {
   font-size: 11px;
@@ -1037,7 +931,7 @@ html:not(.dark) .vp-doc tr:nth-child(even) td {
   font-family: var(--font-serif);
   font-size: 15px;
   color: var(--vp-c-brand-1);
-  transition: color 0.3s;
+  transition: color var(--md-dur-2) var(--md-ease);
 }
 .VPDocFooter .pager-link:hover .title {
   color: var(--vp-c-brand-2);
@@ -1049,7 +943,9 @@ html:not(.dark) .vp-doc tr:nth-child(even) td {
   top: 50%;
   transform: translateY(-50%);
   color: var(--vp-c-text-3);
-  transition: all 0.3s;
+  transition:
+    color var(--md-dur-2) var(--md-ease),
+    transform var(--md-dur-2) var(--md-ease);
 }
 .VPDocFooter .pager-link.prev::before {
   content: '←';
@@ -1058,7 +954,9 @@ html:not(.dark) .vp-doc tr:nth-child(even) td {
   top: 50%;
   transform: translateY(-50%);
   color: var(--vp-c-text-3);
-  transition: all 0.3s;
+  transition:
+    color var(--md-dur-2) var(--md-ease),
+    transform var(--md-dur-2) var(--md-ease);
 }
 .VPDocFooter .pager-link.next {
   position: relative;
@@ -1091,9 +989,65 @@ html:not(.dark) .vp-doc tr:nth-child(even) td {
 }
 
 ::selection {
-  background: rgba(107, 141, 212, 0.3);
-  color: #e2e8f0;
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
 }
-html:not(.dark) ::selection {
-  color: #1e293b;
+
+/* ---------- 10. Material 涟漪与滚动入场动效（由 Layout.vue 驱动） ---------- */
+
+/* 涟漪：pointerdown 时注入宿主元素内部，currentColor 圆形扩散后淡出。
+   宿主（Hero 按钮 / note-card / pager-link）需 position:relative + overflow:hidden，
+   已在各自组件规则中声明。 */
+.md-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.14;
+  transform: scale(0);
+  pointer-events: none;
+  animation: md-ripple 520ms var(--md-ease) forwards;
+}
+@keyframes md-ripple {
+  from {
+    transform: scale(0);
+    opacity: 0.14;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* 滚动入场：JS 加 .md-reveal 预隐藏，进入视口加 .md-in 播放上升淡入。
+   用 animation 而非 transition —— 避免 stagger 延迟污染卡片的 hover 过渡。
+   --md-reveal-delay 由 JS 按序号写入（70ms 一档，封顶 280ms）。 */
+.md-reveal {
+  opacity: 0;
+}
+.md-reveal.md-in {
+  animation: md-rise var(--md-dur-4) var(--md-ease) both;
+  animation-delay: var(--md-reveal-delay, 0ms);
+}
+@keyframes md-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 减少动效：不注入涟漪（JS 侧同步拦截），内容直接可见 */
+@media (prefers-reduced-motion: reduce) {
+  .md-ripple {
+    display: none;
+  }
+  .md-reveal {
+    opacity: 1;
+  }
+  .md-reveal.md-in {
+    animation: none;
+  }
 }

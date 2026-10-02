@@ -91,7 +91,7 @@ agent 的职责是维护承载它的结构，而不是替作者说话。
 │   │   ├── config.mjs             # 站点配置：base / locales / nav / sidebar
 │   │   └── theme/
 │   │       ├── index.js           # 主题入口：extends 默认主题 + Layout + custom.css
-│   │       ├── Layout.vue         # 自定义 Layout（滚动状态、hero 背景图、导航高光）
+│   │       ├── Layout.vue         # 自定义 Layout（滚动状态、hero 背景图、涟漪与入场动效）
 │   │       ├── custom.css         # 全站样式（1099 行，按 0–9 分区）
 │   │       ├── hero-bg.js         # hero 图 srcset 构建器（导出 WIDTHS / buildSrcSet…）
 │   │       ├── hero-lqip.js       # hero 占位图 data URI
@@ -204,17 +204,22 @@ hero 的中英关系是**镜像**的：中文站 hero 用英文大标题，英�
 
 ### `theme/Layout.vue`
 
-在默认 Layout 之上叠加三件事：
+在默认 Layout 之上叠加四件事：
 
 1. **滚动状态**：`window.scrollY > 50` 时给 `<html>` 加 `.scrolled`，
-   驱动导航栏"透明 → Liquid Glass"（样式在 `custom.css` §3）。
+   驱动导航栏"透明 → 毛玻璃 surface"（样式在 `custom.css` §3）。
 2. **hero 响应式背景图**：通过 `#home-hero-info-before` 插槽注入一个
    `<picture>`（AVIF → WebP → JPEG 回退）+ LQIP 模糊占位 + 渐变遮罩层。
    > 槽位必须是 `home-hero-info-before`：它渲染在 `.VPHero` **内部**，
    > 而 `home-hero-before` 会渲染成 `.VPHero` 的**兄弟节点**，`inset: 0` 会锚错元素。
-3. **按钮镜面高光**：`document` 级指针事件委托（路由切换无需重绑），
-   rAF 节流，只写 `--lg-gx/--lg-gy` 两个 CSS 变量，实际动画交给 CSS。
-   触摸设备（`pointerType === 'touch'`）与 `prefers-reduced-motion: reduce` 下整体跳过。
+3. **Material 涟漪**：`document` 级 `pointerdown` 委托（路由切换无需重绑），
+   向 Hero 按钮 / `.note-card` / `.pager-link` 注入 `span.md-ripple`，
+   `animationend` 后自删；动画全部在 CSS（`custom.css` §10）。
+   `prefers-reduced-motion: reduce` 下整体跳过。
+4. **滚动入场**：`IntersectionObserver` 给 `.VPFeature` 与非 about 页的
+   `.note-card` 加 `.md-in`，按序号写 `--md-reveal-delay`（70ms 一档，封顶 280ms）。
+   路由切换后（`watch(route.path)`）重新登记；用 animation 而非 transition，
+   避免 stagger 延迟污染卡片 hover。
 
 ### hero 图片资产链
 
@@ -240,14 +245,15 @@ scripts/src/hero-bg.jpg
 | --- | --- |
 | 0 | 字体引入（Google Fonts + 霞鹜文楷 CDN） |
 | 1 | 设计 Token |
-| 2 | 首页 Hero（含响应式背景图图层、按钮液态玻璃、滚动指示箭头） |
-| 3 | 导航栏（滚动前透明 → 滚动后 Liquid Glass） |
+| 2 | 首页 Hero（含响应式背景图图层、M3 Filled+Tonal 按钮、滚动指示箭头） |
+| 3 | 导航栏（滚动前透明 → 滚动后毛玻璃 surface；菜单项 M3 胶囊导航态） |
 | 4 | 代码块（Stripe 风格深色） |
 | 5 | 文章页 |
-| 6 | 侧边栏与右侧目录 |
-| 7 | Feature 卡片 |
-| 8 | **笔记目录卡片（`.note-cards` / `.note-card`）与翻页器** |
+| 6 | 侧边栏与右侧目录（M3 导航抽屉形态） |
+| 7 | Feature 卡片（M3 filled card） |
+| 8 | **笔记目录卡片（`.note-cards` / `.note-card`）与翻页器**（M3 interactive card） |
 | 9 | 滚动条与选区 |
+| 10 | Material 涟漪（`.md-ripple`）与滚动入场（`.md-reveal`/`.md-in`），由 Layout.vue 驱动 |
 
 约定：
 
@@ -255,8 +261,9 @@ scripts/src/hero-bg.jpg
   **不要把深色规则混进元素选择器**——light/dark 必须隔离。
 - 字体变量：`--font-serif`(Newsreader / Noto Serif SC)、`--font-sans`(Inter)、
   `--font-cjk-display`(LXGW WenKai)。
-- 品牌色 light/dark 各一套（`--vp-c-brand-*`），圆角与动效曲线也是 token 化的；
-  新组件优先复用 token，不要写魔数。
+- 品牌色 light/dark 各一套（`--vp-c-brand-*`）；Material 色彩角色（`--md-primary*`、
+  `--md-surface-container*`、`--md-outline-variant`）、动效（`--md-ease`、`--md-dur-*`）
+  与 elevation（`--md-shadow-1/2`）也都是 token 化的；新组件优先复用 token，不要写魔数。
 - `.note-cards / .note-card / .note-card-glyph` 是**通用**链接卡片组件（§8），
   不只服务 notes 页；卡片容器用 `auto-fill`，卡片少时不会铺满整行，属既有行为。
 - 任何样式改动都要**同时验证 light 与 dark**。
