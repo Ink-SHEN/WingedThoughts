@@ -759,19 +759,30 @@ html:not(.dark) .vp-doc tr:nth-child(even) td {
   background-color: var(--vp-c-bg);
 }
 
-/* 选中项：M3 导航抽屉形态 —— 圆角胶囊 + primary 容器底色（取消左侧指示条） */
-.VPSidebar .VPLink .link {
+/* 侧边栏条目：M3 导航抽屉形态
+   ⚠️ 两处VitePress 1.6 结构陷阱，都曾让这里的规则变成死代码：
+   1) 侧边栏锚点本身同时带 .VPLink 和 .link（<a class="VPLink link link">），
+      所以 `.VPLink .link`（后代式，要求 .VPLink 是祖先）永不命中 —— 必须写成
+      复合选择器 `.VPLink.link`。
+   2) active 状态标记在**父级** .VPSidebarItem（.is-active / .has-active），
+      .link 自身永不带 .active —— 早先的 `.VPLink .link.active` 同样永不命中。
+   实测（浏览器计算样式）：错写法下 bg=transparent、radius=0px，底色与圆角
+   根本没渲染出来。 */
+.VPSidebar .VPLink.link {
   position: relative;
   border-radius: 10px;
   transition: background-color var(--md-dur-2) var(--md-ease);
 }
-.VPSidebar .VPLink .link:hover {
+.VPSidebar .VPLink.link:hover {
   background: color-mix(in srgb, var(--vp-c-text-1) 5%, transparent);
 }
-.VPSidebar .VPLink .link.active {
+
+/* 当前页：primary 容器底色胶囊（无左侧指示条，M3 导航抽屉语言） */
+.VPSidebar .VPSidebarItem.is-active > .item > .link,
+.VPSidebar .VPSidebarItem.is-active > .item > .indicator + .link {
   background: var(--md-nav-active-bg);
 }
-.VPSidebar .VPLink .link.active:hover {
+.VPSidebar .VPSidebarItem.is-active > .item > .link:hover {
   background: color-mix(in srgb, var(--vp-c-brand-1) 14%, transparent);
 }
 
